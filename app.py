@@ -1,4 +1,12 @@
 from flask import Flask, render_template, request
+import os   
+import openai
+from flask import Flask, render_template, request, jsonify
+from dotenv import load_dotenv  
+load_dotenv()
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
 
 app = Flask(__name__)
 # Пътят към началната страница
@@ -25,5 +33,5 @@ def ask():
 
 if __name__ == '__main__':
     app.run(debug=True)
-    
+
 
