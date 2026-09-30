@@ -1,6 +1,7 @@
 /* style.css */
 
 :root {
+    color-scheme: dark;
     --bg-dark: #121212;
     --bg-card: #1e1e1e;
     --text-main: #e0e0e0;
@@ -110,14 +111,22 @@ body {
 .form-control {
     background-color: #252525;
     border: 1px solid var(--border-color);
-    color: white;
+    color: #fff;
+    caret-color: #fff;
+    -webkit-text-fill-color: #fff;
     padding: 12px;
 }
 .form-control:focus {
     background-color: #2a2a2a;
-    color: white;
+    color: #fff;
+    caret-color: #fff;
+    -webkit-text-fill-color: #fff;
     border-color: var(--accent-blue);
     box-shadow: 0 0 8px rgba(0, 210, 255, 0.4);
+}
+#userInput {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
 }
 .btn-primary {
     background-color: var(--accent-blue);

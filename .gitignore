@@ -1,0 +1,11 @@
+# Секрети — никога не комитвай!
+.env
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Случайни артефакти
+package-lock.json

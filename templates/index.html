@@ -28,7 +28,7 @@
         <div class="main-card">
             
             <div class="mb-4 text-center os-selector">
-                <h1>Здравей, {{ name }}!</h1>
+                <h1>Здравей!</h1>
 
                 <h5 class="text-muted mb-3">Изберете Вашата операционна система:</h5>
                 <div class="d-inline-block me-2">
@@ -66,37 +66,50 @@
         </div>
     </div>
 <script>
-   async function sendMessage() {
+  async function sendMessage() {
     let input = document.getElementById('userInput');
     let chatWindow = document.getElementById('chatWindow');
     let osType = document.querySelector('input[name="os-type"]:checked').id; // Взема windows или linux
     
     if (input.value.trim() !== "") {
         let userText = input.value;
-        
+
         // Показваме съобщението на потребителя
         chatWindow.innerHTML += `<div class="message user-message"><i class="fas fa-user message-icon"></i><div class="message-content">${userText}</div></div>`;
         input.value = "";
+        chatWindow.scrollTop = chatWindow.scrollHeight;
 
-        // Изпращане към Python сървъра
-        const response = await fetch('/ask', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: userText, os: osType })
-        });
-        
-        const data = await response.json();
+        try {
+            // Изпращане към Python сървъра
+            const response = await fetch('/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: userText, os: osType })
+            });
 
-        // Показваме отговора от сървъра
-        chatWindow.innerHTML += `
-            <div class="message ai-message">
-                <i class="fas fa-robot message-icon"></i>
-                <div class="message-content">${data.response}</div>
-            </div>`;
-        
+            const data = await response.json();
+
+            // Показваме отговора от сървъра
+            chatWindow.innerHTML += `
+                <div class="message ai-message">
+                    <i class="fas fa-robot message-icon"></i>
+                    <div class="message-content">${data.response}</div>
+                </div>`;
+        } catch (err) {
+            chatWindow.innerHTML += `
+                <div class="message ai-message">
+                    <i class="fas fa-robot message-icon"></i>
+                    <div class="message-content">Грешка при връзка със сървъра. Работи ли app.py?</div>
+                </div>`;
+        }
+
         chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 }
+
+document.getElementById('userInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') sendMessage();
+});
 </script>
 </body>
 </html>

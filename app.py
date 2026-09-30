@@ -1,37 +1,55 @@
-from flask import Flask, render_template, request
-import os   
-import openai
+import os
 from flask import Flask, render_template, request, jsonify
-from dotenv import load_dotenv  
+from dotenv import load_dotenv
+from openai import OpenAI
+
+# Зареждане на конфигурацията
 load_dotenv()
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
-
 app = Flask(__name__)
-# Пътят към началната страница
+
+# Инициализиране на клиента (Новият стандарт)
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 @app.route('/')
 def home():
-
     return render_template('index.html')
-# Мястото,където ще приемаме въпросите от чата
+
 @app.route('/ask', methods=['POST'])
 def ask():
-    data = request.json
-    user_massage = data.get('message')
-    os_type = data.get("os")
+    # 1. Получаване на данни от Frontend-а
+    data = request.get_json()
+    if not data:
+        return jsonify({"response": "Грешка: Не са изпратени данни."}), 400
 
-    # Тук ще се добави логиката за обработка на въпроса и генериране на отговор
-    # За сега ще връщаме фиктивен отговор
-    if os_type == "windows":
-        ai_response = f"Виждам,че имаш проблем с Windows.Опитвам се да намеря решение за този проблем: {user_massage}"
-    else:
-        ai_response = f"Linux експертът е тук! Анализиран твоя проблем: {user_massage}"
+    user_query = data.get('message', '')
+    os_context = data.get('os', 'Linux') # По подразбиране Linux
 
+    try:
+        # 2. Изпращане на заявка към OpenAI
+        completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system", 
+                    "content": f"Ти си експерт по техническа поддръжка за {os_context}. "
+                               "Давай конкретни стъпки и команди. Използвай професионален тон."
+                },
+                {"role": "user", "content": user_query}
+            ],
+            temperature=0.7
+        )
 
-    return jsonify({"response": ai_response})
+        # 3. Извличане на отговора
+        ai_response = completion.choices[0].message.content
+        return jsonify({"response": ai_response})
+
+    except Exception as e:
+        # Логване на грешката в терминала за теб
+        print(f"DEBUG ERROR: {str(e)}")
+        return jsonify({"response": "Сървърна грешка при връзка с AI. Провери .env файла."}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
-
+    # Включен debug режим за лесно проследяване на грешки в Linux терминала
+    app.run(host='127.0.0.1', port=5000, debug=True)
 
